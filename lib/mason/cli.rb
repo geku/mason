@@ -109,7 +109,7 @@ class Mason::CLI < Thor
         raise "img not supported yet"
       when :dir then
         FileUtils.rm_rf output
-        FileUtils.cp_r compile_dir, output, :preserve => true
+        FileUtils.cp_r compile_dir, output
       else
         raise "no such output type: #{type}"
       end

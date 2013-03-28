@@ -1,6 +1,7 @@
 require "mason"
 require "tmpdir"
 require "yaml"
+require "fileutils"
 require "foreman/engine"
 
 class Mason::Buildpack

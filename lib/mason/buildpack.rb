@@ -95,7 +95,7 @@ private
       run_script_file = File.join(compile_dir, "bin/run-#{name}.sh")
       File.open(run_script_file, "w") do |f|
         f.puts <<END
-#!/bin/sh
+#!/bin/bash
 export HOME=/app
 
 cd $HOME

@@ -100,7 +100,7 @@ export HOME=/app
 
 cd $HOME
 export PORT=5000
-source /app/.profile.d/*.sh
+source $HOME/.profile.d/*.sh
 
 #{command}
 

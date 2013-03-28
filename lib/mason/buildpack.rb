@@ -47,23 +47,15 @@ class Mason::Buildpack
       end
       raise "compile failed" unless $?.exitstatus.zero?
     end
-    release = YAML.load(`#{script('release')} "#{compile_dir}"`)
-    write_env(compile_dir, release, env_file)
-    write_procfile(compile_dir, release)
+    release_config = YAML.load(`#{script('release')} "#{compile_dir}"`)
+
+    write_procfile(compile_dir, release_config)
+    write_start_script(compile_dir, release_config)
+
     compile_dir
   end
 
 private
-
-  def write_env(compile_dir, release, env_file)
-    env = env_file ? Foreman::Engine.new.load_env(env_file) : {}
-    config_vars  = release["config_vars"] || {}
-    config = config_vars.merge(env)
-
-    File.open(File.join(compile_dir, ".env"), "w") do |f|
-      f.puts config.map{|k, v| "#{k}=#{v}"}.join("\n")
-    end
-  end
 
   def write_procfile(compile_dir, release)
     filename = File.join(compile_dir, "Procfile")
@@ -80,6 +72,40 @@ private
         f.puts "#{name}: #{command}"
       end
     end
+  end
+
+  def write_start_script(compile_dir, release_config, env_file)
+    # If no .profile.d script exists we write one with the provided config_vars
+    # TODO test with JAVA buildpack as it does not provide .profile.d script
+    if Dir['.profile.d/*.sh'].size <= 0
+      config_vars  = release_config["config_vars"] || {}
+      unless config_vars.empty?
+        File.open(File.join(compile_dir, ".profile.d/env.sh"), "w") do |f|
+          f.puts config.map{|k, v| "export #{k}=#{v}"}.join("\n")
+        end
+      end
+    end
+
+    # Open Procfile to read processes and write start script for each
+    procfile = File.join(compile_dir, "Procfile")
+    Foreman::Procfile.new(filename).entries do |name, command|
+      next if ['rake', 'console'].include?(name)
+
+      File.open(File.join(compile_dir, "bin/#{name}.sh"), "w") do |f|
+        f.puts <<END
+#!/bin/sh
+export HOME=/app
+
+cd $HOME
+export PORT=5000
+source /app/.profile.d/*.sh
+
+#{command}
+
+END
+      end
+    end
+    
   end
 
   def mkchtmpdir

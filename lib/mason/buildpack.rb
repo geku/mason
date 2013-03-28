@@ -91,7 +91,8 @@ private
     Foreman::Procfile.new(procfile).entries do |name, command|
       next if ['rake', 'console'].include?(name)
 
-      File.open(File.join(compile_dir, "bin/#{name}.sh"), "w") do |f|
+      run_script_file = File.join(compile_dir, "bin/run-#{name}.sh")
+      File.open(run_script_file, "w") do |f|
         f.puts <<END
 #!/bin/sh
 export HOME=/app
@@ -104,6 +105,7 @@ source /app/.profile.d/*.sh
 
 END
       end
+      FileUtils.chmod 0755, run_script_file
     end
     
   end

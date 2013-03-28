@@ -88,7 +88,7 @@ private
 
     # Open Procfile to read processes and write start script for each
     procfile = File.join(compile_dir, "Procfile")
-    Foreman::Procfile.new(filename).entries do |name, command|
+    Foreman::Procfile.new(procfile).entries do |name, command|
       next if ['rake', 'console'].include?(name)
 
       File.open(File.join(compile_dir, "bin/#{name}.sh"), "w") do |f|

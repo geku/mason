@@ -57,9 +57,9 @@ class Mason::Buildpack
 
 private
 
-  def write_procfile(compile_dir, release)
+  def write_procfile(compile_dir, release_config)
     filename = File.join(compile_dir, "Procfile")
-    process_types = release["default_process_types"] || {}
+    process_types = release_config["default_process_types"] || {}
 
     if File.exists? filename
       Foreman::Procfile.new(filename).entries do |name, command|
@@ -74,7 +74,7 @@ private
     end
   end
 
-  def write_start_script(compile_dir, release_config, env_file)
+  def write_start_script(compile_dir, release_config)
     # If no .profile.d script exists we write one with the provided config_vars
     # TODO test with JAVA buildpack as it does not provide .profile.d script
     if Dir['.profile.d/*.sh'].size <= 0
